@@ -8,7 +8,7 @@ exports.create = async (req, res) => {
 
     Chatroom.create(newChatroom, (error, data) => {
       if (error) {
-        res.status(400).json({ error: new Error("Couldn't create chatroom") });
+        res.status(400).json({error : error, message: "Couldn't create chatroom" });
       }
       res
         .status(200)
@@ -16,7 +16,7 @@ exports.create = async (req, res) => {
     });
   } catch {
     res.status(401).json({
-      error: new Error("Invalid request !"),
+      error: "Invalid request !",
     });
   }
 };
@@ -28,7 +28,7 @@ exports.update = async (req, res) => {
 
     Chatroom.updateOne({ _id: chatroomId }, newChatroom, (error, data) => {
       if (error) {
-        res.status(400).json({ error: new Error("Couldn't update chatroom") });
+        res.status(400).json({ error : error, message : "Couldn't update chatroom" });
       }
       res
         .status(200)
@@ -36,7 +36,7 @@ exports.update = async (req, res) => {
     });
   } catch {
     res.status(401).json({
-      error: new Error("Invalid request !"),
+      error: "Invalid request !",
     });
   }
 };

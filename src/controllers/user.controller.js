@@ -31,35 +31,44 @@ exports.create = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const loginUser = req.body;
+    if (!loginUser.email) loginUser.email = "";
+    if (!loginUser.username) loginUser.username = "";
 
-    User.find({ username: loginUser.username }, (error, data) => {
-      if (error) {
-        return res.status(400).json({
-          error: error,
-          message: "Something went wrong; couldn't create user",
-        });
+    User.findOne(
+      { $or: [{ email: loginUser.email }, { username: loginUser.username }] },
+      ( error, data ) => {
+        if (error) {
+          return res.status(400).json({
+            error: error,
+            message: "Something went wrong; couldn't create user",
+          });
+        }
+
+        if (!data) {
+          return res.status(404).json({ error: "Username not found" });
+        }
+
+        if (data.verifCode !== null) {
+          return res.status(403).json({ error: "Account not yet activated" });
+        }
+
+        if (!bcrypt.compareSync(loginUser.password, data.password)) {
+          return res.status(403).json({ error: "Wrong password" });
+        }
+
+
+        //Setting response data
+        loginUser.id = data._id;
+        loginUser.email = data.email;
+        loginUser.username = data.username;
+        loginUser.roles = data.roles;
+        const token = jwt.sign(loginUser, process.env.TOKEN_SECRET);
+        
+        return res
+          .status(200)
+          .json({ message: "Logged in successfully", data: loginUser, token : token });
       }
-
-      if (!data) {
-        return res.status(404).json({ error: "Username not found" });
-      }
-
-      if (data.verifCode !== null) {
-        return res.status(403).json({ error: "account not yet verified" });
-      }
-
-      if (!bcrypt.compareSync(loginUser.password, data.password)) {
-        return res.status(403).json({ error: "Wrong password" });
-      }
-
-      loginUser.id = data.id;
-      const token = jwt.sign(loginUser, process.env.TOKEN_SECRET);
-      data.token = token;
-
-      return res
-        .status(400)
-        .json({ message: "Logged in successfully", data: data });
-    });
+    );
   } catch {
     return res.status(401).json({
       error: "Invalid request !",
@@ -175,8 +184,23 @@ module.exports.sendVerificationMail = async (req, res) => {
 // confirm mail
 exports.registerConfirm = async (req, res) => {
   try {
+    //checking if email is found in database or not
+    User.findOne({ email: req.body.email }, (error, data) => {
+      if (error)
+        return res
+          .status(400)
+          .send({ error: error, message: "Something went wrong!" });
+      if (!data)
+        return res.status(404).send({ error: "This email doesn't exist" });
+    });
+
+    //activating account
     User.findOneAndUpdate(
-      { $where: () => bcrypt.compare(req.body.verifCode, "this.verifCode") },
+      {
+        $where: () =>
+          bcrypt.compare(req.body.verifCode, "this.verifCode") &&
+          "this.email" == req.body.email,
+      },
       { $set: { verifCode: null } },
       (error, data) => {
         if (error) {

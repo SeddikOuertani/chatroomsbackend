@@ -1,16 +1,17 @@
 const { roles } = require("../utils/roles");
 
-module.exports = (req, res, next) => {
+module.exports.isAdmin = (req, res, next) => {
   try {
     const acquiredRoles = req.body.token.roles;
-    if (!acquiredRoles.include(roles.admin)) {
+    if (!acquiredRoles.includes(roles.admin)) {
       throw "Unothorized";
     } else {
       next();
     }
-  } catch {
+  } catch  (err){
+    console.log(err)
     res.status(401).json({
-      error: new Error("Invalid request !"),
+      error: "Invalid request !",
     });
   }
 };

@@ -1,12 +1,15 @@
+const { isAuth } = require("../middlewares/auth");
+const {isUser} = require("../middlewares/isUser");
+
 module.exports = (app) => {
   const chatroom = require("../controllers/chatroom.controller");
   var router = require("express").Router();
   // Create a new chatroom
-  router.post("/", chatroom.create);
+  router.post("/", isAuth, isUser, chatroom.create);
   // Retrieve all chatroom
-  router.get("/", chatroom.getAll);
+  router.get("/",isAuth, chatroom.getAll);
   // Retrieve a single chatroom with id
-  router.get("/:id", chatroom.getOne);
+  router.get("/:id",isAuth, chatroom.getOne);
   // Update a chatroom with id
   router.put("/:id", chatroom.update);
   // Delete a chatroom with id

@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 // Define collection and schema
 let Pfp = new Schema(
   {
-    userId : String,
+    userId : {type : mongoose.Schema.Types.ObjectId, ref : "User"},
     image : String,
   },
   { collection: "Pfp", timestamps: true }

@@ -1,4 +1,9 @@
-const { registerValidator, loginValidator, registerConfirmValidator, verificationMailValidator } = require("../middlewares/validators");
+const {
+  registerValidator,
+  loginValidator,
+  registerConfirmValidator,
+  verificationMailValidator,
+} = require("../middlewares/validators");
 
 module.exports = (app) => {
   const user = require("../controllers/user.controller");
@@ -10,10 +15,18 @@ module.exports = (app) => {
   // Register
   router.post("/register", registerValidator, user.register);
   // Confirm registration
-  router.post("/registerconfirm", registerConfirmValidator, user.registerConfirm);
+  router.post(
+    "/registerconfirm",
+    registerConfirmValidator,
+    user.registerConfirm
+  );
   // Send verification mail
-  router.post("/sendconfmail", verificationMailValidator, user.sendVerificationMail);
+  router.post(
+    "/sendconfmail",
+    verificationMailValidator,
+    user.sendVerificationMail
+  );
   // Delete a User with id
-//   router.delete("/:id", user.delete);
+  //   router.delete("/:id", user.delete);
   app.use("/api/users", router);
 };

@@ -133,7 +133,7 @@ module.exports.registerValidator = (req, res, next) => {
   const options = {
     abortEarly: false, // include all errors
     allowUnknown: true, // ignore unknown props
-    stripUnknown: false, // remove unknown props
+    stripUnknown: true, // remove unknown props
   };
 
   // validate request body against schema
@@ -151,8 +151,11 @@ module.exports.registerValidator = (req, res, next) => {
 
 module.exports.chatroomValidator = (req, res, next) => {
   const schema = Joi.object({
+    creatorId : Joi.string().required(),
+    public : Joi.boolean().default(true),
+    key : Joi.string().default(null),
     title: Joi.string().required(),
-    desctiption: Joi.string(),
+    description: Joi.string(),
     maxSize: Joi.number().min(2).max(10),
   });
 

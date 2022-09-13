@@ -1,27 +1,36 @@
 const express = require("express");
-const db = require("./src/models")
+const db = require("./src/models");
 const createError = require("http-errors");
-require('dotenv').config();
-
-// using express
+const logger = require("morgan");
+require("dotenv").config();
+const cors = require("cors");
 const app = express();
+const http = require("http").createServer(app);
+const { Server } = require("socket.io");
 
 // using bodyparser middleware
 app.use(express.json());
-app.use(express.urlencoded({
-   extended: true
-}));
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+//using morgan logger
+app.use(logger("dev"));
+
+//using cors middleware
+app.use(cors({ origin: "http://localhost:3000" }));
 
 // Connecting with mongo db
 db.mongoose
   .connect(db.url, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
   })
   .then(() => {
     console.log("Connected to the database!");
   })
-  .catch(err => {
+  .catch((err) => {
     console.log("Cannot connect to the database!", err);
     process.exit();
   });
@@ -30,21 +39,29 @@ db.mongoose
 require("./src/routes/chatroom.routes")(app);
 require("./src/routes/user.routes")(app);
 
+//setting up socket io
+const io = new Server(http, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["POST", "GET"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log(`User connected ${socket.id}`);
+  socket.on("sendMessage", (msg) => {
+    console.log(msg.message);
+    socket.broadcast.emit("recieveMessage", msg);
+  });
+});
 
 // Create port
 const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log('Connected to port ' + port)
-})
+http.listen(port, () => {
+  console.log("Connected to port " + port);
+});
 
 // Find 404 and hand over to error handler
 app.use((req, res, next) => {
   next(createError(404));
-});
-
-// error handler
-app.use(function (err, req, res, next) {
-  console.error(err.message); // Log error message in our server's console
-  if (!err.statusCode) err.statusCode = 500; // If err has no specified error code, set error code to 'Internal Server Error (500)'
-  res.status(err.statusCode).send(err.message); // All HTTP requests must have a response, so let's send back an error with its status code and message
 });

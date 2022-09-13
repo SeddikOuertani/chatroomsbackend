@@ -11,8 +11,8 @@ module.exports = (app) => {
   // Retrieve a single chatroom with id
   router.get("/:id",isAuth, chatroom.getOne);
   // Update a chatroom with id
-  router.put("/:id", chatroom.update);
+  router.put("/:id",isAuth, chatroom.update);
   // Delete a chatroom with id
-  router.delete("/:id", chatroom.delete);
+  router.delete("/:id",isAuth, chatroom.delete);
   app.use("/api/chatrooms", router);
 };

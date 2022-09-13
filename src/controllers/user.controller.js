@@ -79,6 +79,7 @@ exports.login = async (req, res) => {
 //register user
 exports.register = async (req, res) => {
   try {
+    
     //getting user data from request body
     const registerUser = req.body;
 

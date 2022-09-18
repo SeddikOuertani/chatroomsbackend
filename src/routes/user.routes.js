@@ -1,8 +1,10 @@
+const { isAuth } = require("../middlewares/auth");
 const {
   registerValidator,
   loginValidator,
   registerConfirmValidator,
   verificationMailValidator,
+  resetPasswordValidator,
 } = require("../middlewares/validators");
 
 module.exports = (app) => {
@@ -26,6 +28,15 @@ module.exports = (app) => {
     verificationMailValidator,
     user.sendVerificationMail
   );
+
+  // Reset password
+  router.post("/resetpassword", resetPasswordValidator, user.resetPassword);
+
+  // log out
+  router.get("/logout/:userId", isAuth, user.logOut);
+
+  router.get("/connected", isAuth, user.getConnectedUsers);
+
   // Delete a User with id
   //   router.delete("/:id", user.delete);
   app.use("/api/users", router);

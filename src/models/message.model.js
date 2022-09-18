@@ -4,8 +4,11 @@ const Schema = mongoose.Schema;
 let Message = new Schema(
   {
     userId: String,
+    roomId: String,
     text: String,
     hasImage: Boolean,
+    hasVocal : Boolean,
+    hasAttachement : Boolean
   },
   { collection: "Message", timestamps: true }
 );

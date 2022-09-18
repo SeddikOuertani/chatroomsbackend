@@ -94,7 +94,7 @@ exports.update = async (req, res) => {
 //returns a chatroom by its id
 exports.getOne = async (req, res) => {
   try {
-    const chatroomId = req.params.chatroomId;
+    const chatroomId = req.params.id;
 
     Chatroom.findById({ _id: chatroomId }, (error, data) => {
       if (error) {
@@ -132,3 +132,4 @@ exports.getAll = async (req, res) => {
     });
   }
 };
+

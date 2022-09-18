@@ -35,10 +35,6 @@ db.mongoose
     process.exit();
   });
 
-// including routes
-require("./src/routes/chatroom.routes")(app);
-require("./src/routes/user.routes")(app);
-
 //setting up socket io
 const io = new Server(http, {
   cors: {
@@ -48,12 +44,43 @@ const io = new Server(http, {
 });
 
 io.on("connection", (socket) => {
-  console.log(`User connected ${socket.id}`);
-  socket.on("sendMessage", (msg) => {
-    console.log(msg.message);
-    socket.broadcast.emit("recieveMessage", msg);
+  socket.removeAllListeners();
+  socket.on("connecting", userInfo => {
+    socket.broadcast.emit("userConnected", userInfo.username);
+  })
+  socket.on("sendMessage", (msg, roomId, userInfo) => {
+    console.log(`User ${msg.userId} has sent a message to room ${roomId}`);
+    socket.broadcast.to(roomId).emit("messageSent", msg, userInfo);
   });
+  socket.on("joinRoom", (roomId, userInfo) => {
+    console.log(`User ${userInfo.username} has joined ${roomId}`);
+    socket.join(roomId);
+    socket.to(roomId).emit("roomJoined", userInfo, socket.id);
+  });
+
+  socket.on("leaveRoom", (roomId, userInfo) => {
+    console.log(`User ${userInfo.username} has left ${roomId}`);
+    socket.leave(roomId);
+    socket.to(roomId).emit("roomLeft", userInfo, socket.id);
+  });
+
+  socket.on("CreateRoom", (roomData) => {
+    console.log(
+      `User ${userData.creatorId} has created room ${roomData.title}`
+    );
+  });
+  socket.on("disconnectUser", (userInfo) => {
+    console.log(userInfo.username+" disconnected")
+    socket.broadcast.emit("userDisconnected", userInfo.username)
+    socket.disconnect(true)
+    console.log(socket.disconnected)
+  })
 });
+
+// including routes
+require("./src/routes/chatroom.routes")(app);
+require("./src/routes/user.routes")(app);
+require("./src/routes/message.routes")(app);
 
 // Create port
 const port = process.env.PORT || 8080;

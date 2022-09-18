@@ -1,5 +1,7 @@
 const db = require("../models");
 const User = db.user;
+const Message = db.message;
+const Chatroom = db.chatroom;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
@@ -387,6 +389,45 @@ module.exports.getConnectedUsers = async (req, res) => {
       const usernames = data.map(user => user.username);
     
       return res.status(200).send({message : "List of connected Users found", data : usernames});
+    })
+  }catch{
+    return res.status(401).json({
+      error: "Invalid request !",
+    });
+  }
+}
+
+
+// Get all connected users
+module.exports.getUserByUsername = async (req, res) => {
+  try{
+    User.findOne({username : req.params.username}, async (error, data) => {
+      if (error) {
+        return res
+          .status(400)
+          .send({ message: "Something went wrong!", error: error });
+      }
+      if (!data) {
+        return res
+          .status(404)
+          .send({ message: `No User with the username ${req.params.username} found` });
+      }
+
+      const messagesCount = await Message.count({userId : data._id});   
+      const ChatroomsCount = await Chatroom.count({creatorId : data._id});
+    
+      const resData = {
+        username : data.username,
+        firstName : data.firstName,
+        lastName : data.lastName,
+        roles : data.roles,
+        email : data.email,
+        age : data.age,
+        messagesCount : messagesCount,
+        chatroomsCount : ChatroomsCount,
+      }
+
+      return res.status(200).send({message : "User found", data : resData});
     })
   }catch{
     return res.status(401).json({

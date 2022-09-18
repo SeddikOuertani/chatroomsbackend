@@ -35,7 +35,11 @@ module.exports = (app) => {
   // log out
   router.get("/logout/:userId", isAuth, user.logOut);
 
+  // get all connected users 
   router.get("/connected", isAuth, user.getConnectedUsers);
+  
+  //get single username by his username
+  router.get("/username/:username", isAuth, user.getUserByUsername);
 
   // Delete a User with id
   //   router.delete("/:id", user.delete);

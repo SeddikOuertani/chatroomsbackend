@@ -70,10 +70,9 @@ io.on("connection", (socket) => {
     );
   });
   socket.on("disconnectUser", (userInfo) => {
-    console.log(userInfo.username+" disconnected")
-    socket.broadcast.emit("userDisconnected", userInfo.username)
-    socket.disconnect(true)
-    console.log(socket.disconnected)
+    console.log(userInfo.username+" disconnected");
+    socket.broadcast.emit("userDisconnected", userInfo.username);
+    socket.disconnect(true);
   })
 });
 
